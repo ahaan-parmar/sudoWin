@@ -1,0 +1,142 @@
+{
+  "basis": "illustrative_seed",
+  "cell_deg": 1.0,
+  "label": "ILLUSTRATIVE, NOT MEASURED. Hand-written demo data. These cells mark regions where GNSS interference has been publicly reported (Baltic, Black Sea, Eastern Mediterranean, Persian Gulf), but the counts, severities and hours are invented for the demo and are NOT measurements of anything. Do not use for operational planning. route_risk() returns basis=\"illustrative_seed\" for this file.",
+  "n_aircraft": 0,
+  "n_anomalies": 0,
+  "note_hour_utc": "null means the cell applies at every hour. Integer 0-23 means it applies only at that hour UTC.",
+  "source": "Region selection reflects publicly reported interference areas; all numeric values are synthetic.",
+  "version": 1,
+  "cells": [
+    {
+      "region": "baltic",
+      "lat": 54.5,
+      "lon": 20.5,
+      "hour_utc": null,
+      "n_anomalies": 48,
+      "n_aircraft": 14,
+      "max_severity": 0.92,
+      "score": 0.97
+    },
+    {
+      "region": "baltic",
+      "lat": 55.5,
+      "lon": 21.5,
+      "hour_utc": null,
+      "n_anomalies": 31,
+      "n_aircraft": 9,
+      "max_severity": 0.81,
+      "score": 0.92
+    },
+    {
+      "region": "baltic",
+      "lat": 59.5,
+      "lon": 25.5,
+      "hour_utc": null,
+      "n_anomalies": 22,
+      "n_aircraft": 7,
+      "max_severity": 0.74,
+      "score": 0.9
+    },
+    {
+      "region": "baltic",
+      "lat": 57.5,
+      "lon": 19.5,
+      "hour_utc": 14,
+      "n_anomalies": 12,
+      "n_aircraft": 4,
+      "max_severity": 0.66,
+      "score": 0.74
+    },
+    {
+      "region": "black_sea",
+      "lat": 44.5,
+      "lon": 33.5,
+      "hour_utc": null,
+      "n_anomalies": 37,
+      "n_aircraft": 11,
+      "max_severity": 0.88,
+      "score": 0.95
+    },
+    {
+      "region": "black_sea",
+      "lat": 45.5,
+      "lon": 36.5,
+      "hour_utc": null,
+      "n_anomalies": 19,
+      "n_aircraft": 6,
+      "max_severity": 0.71,
+      "score": 0.88
+    },
+    {
+      "region": "black_sea",
+      "lat": 43.5,
+      "lon": 30.5,
+      "hour_utc": 3,
+      "n_anomalies": 9,
+      "n_aircraft": 3,
+      "max_severity": 0.58,
+      "score": 0.59
+    },
+    {
+      "region": "east_med",
+      "lat": 33.5,
+      "lon": 34.5,
+      "hour_utc": null,
+      "n_anomalies": 41,
+      "n_aircraft": 13,
+      "max_severity": 0.9,
+      "score": 0.96
+    },
+    {
+      "region": "east_med",
+      "lat": 32.5,
+      "lon": 35.5,
+      "hour_utc": null,
+      "n_anomalies": 27,
+      "n_aircraft": 8,
+      "max_severity": 0.83,
+      "score": 0.93
+    },
+    {
+      "region": "east_med",
+      "lat": 34.5,
+      "lon": 33.5,
+      "hour_utc": null,
+      "n_anomalies": 16,
+      "n_aircraft": 5,
+      "max_severity": 0.69,
+      "score": 0.88
+    },
+    {
+      "region": "persian_gulf",
+      "lat": 26.5,
+      "lon": 53.5,
+      "hour_utc": null,
+      "n_anomalies": 25,
+      "n_aircraft": 8,
+      "max_severity": 0.79,
+      "score": 0.92
+    },
+    {
+      "region": "persian_gulf",
+      "lat": 26.5,
+      "lon": 56.5,
+      "hour_utc": null,
+      "n_anomalies": 18,
+      "n_aircraft": 6,
+      "max_severity": 0.76,
+      "score": 0.9
+    },
+    {
+      "region": "persian_gulf",
+      "lat": 28.5,
+      "lon": 50.5,
+      "hour_utc": 19,
+      "n_anomalies": 11,
+      "n_aircraft": 4,
+      "max_severity": 0.63,
+      "score": 0.73
+    }
+  ]
+}
