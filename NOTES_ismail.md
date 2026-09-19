@@ -17,6 +17,9 @@
 - **P2:** the e2e check asserts **0 anomalies on the clean baseline**.
 - **P3:** `airports.py` needs EYVI and EFHK. `baro_geo_mismatch` anomalies carry the *spoofed* position, so `estimate_source` should weight `position_jump` and `signal_dropout` (true positions) instead. The e2e check requires a source error under 150 km. `route_risk(..., hz)` must accept the dict from `build_hotzones` of a single snapshot.
 
+## Trial merge with origin/p3-locate (not committed)
+- 87 tests pass; e2e check ALL PASS with the real locate + hotzones modules: source error 38.5 km (stub 74 km), route LOW 0.00 -> HIGH 0.91.
+- airports.py has EYVI/EFHK. The seed alone rates EYVI -> EFHK HIGH (0.78), so the demo must pass snapshot="baseline" for the "before" step.
+
 ## Open
-- **Not pushed:** there's no git remote yet; the local branch `p4-server` is committed. Add the team remote and run `git push -u origin p4-server`.
 - NOTAMs are a labelled SAMPLE unless `FAA_CLIENT_ID`/`FAA_CLIENT_SECRET` are set. The FAA call is untested (no key).

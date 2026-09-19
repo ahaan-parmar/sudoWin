@@ -4,6 +4,8 @@ Setup (before going on stage): `source .venv/bin/activate`, `python demo/check_e
 
 Route used: **EYVI (Vilnius) -> EFHK (Helsinki)**, which crosses the Baltic baseline area (bbox 54-61N, 19-28E). If the merged baseline covers another area, pick two airports on either side of it, and leave out source_lat/source_lon so the event lands at the centre of the area.
 
+**Always name the snapshot in step 1.** Without it, `route_check` uses the illustrative seed, which already rates EYVI -> EFHK HIGH, and the before/after contrast is lost.
+
 | Time | Say / type | What should happen |
 |---|---|---|
 | 0-10 s | "Spoofing reports rose 193% (IATA 2025). We can't stop a fake signal; we stop it from mattering." | none |
