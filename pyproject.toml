@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "gnsswatch"
+version = "0.1.0"
+description = "GNSS Watch: MCP server that flags GNSS spoofing/jamming in public ADS-B data and warns before departure."
+requires-python = ">=3.11"
+dependencies = [
+    "pydantic>=2",
+    "numpy",
+    "httpx",
+    "mcp>=1.10,<2",  # mcp 2.x renamed FastMCP; we use mcp.server.fastmcp
+    "pytest",
+]
+
+[project.scripts]
+gnss-watch = "gnsswatch.server:main"
+
+[tool.setuptools]
+packages = ["gnsswatch"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
