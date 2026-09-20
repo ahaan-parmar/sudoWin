@@ -3,3 +3,9 @@ __pycache__/
 *.pyc
 .env
 .pytest_cache/
+.DS_Store
+
+# Dashboard working snapshots: ~17 MB, regenerated deterministically by
+# demo/dashboard/build_data.py. The committed demo/dashboard/data/scenarios.json
+# is the compact export the page actually reads.
+data/snapshots/dash_*.json

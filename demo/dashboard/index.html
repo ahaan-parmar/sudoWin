@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <title>GNSS Watch — operations dashboard</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="Demo dashboard for GNSS Watch: ADS-B GNSS interference monitor. Sample data only, not a live feed.">
+<meta name="description" content="GNSS Watch: replay of GNSS interference detection over synthetic ADS-B traffic. Figures are real detector output over SIMULATED events.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -12,262 +12,104 @@
 </head>
 <body>
 
-<div class="app" data-scenario="sim" id="app">
+<div class="app" id="app" data-scenario="spoof" data-state="loading">
 
-  <header class="topbar">
-    <div class="brand">
-      <span class="brand-name">GNSS Watch</span>
-      <span class="brand-sub">ADS-B interference monitor</span>
-    </div>
+  <!-- ── hero map ────────────────────────────────────────────────────── -->
+  <main class="stage">
+    <canvas id="map" class="map"></canvas>
 
-    <div class="summary-cards">
-      <div class="card-metric">
-        <span class="metric-label">Aircraft tracked</span>
-        <span class="metric-value" id="tracked-count">38</span>
-      </div>
-      <div class="card-metric card-metric--flagged" id="flagged-card">
-        <span class="metric-label">Flagged</span>
-        <span class="metric-value" id="flagged-num">5</span>
-      </div>
-    </div>
+    <div class="loading" id="loading"><span class="spin" aria-hidden="true"></span>Loading detector output…</div>
 
-    <div class="scenario-switch" role="group" aria-label="Demo scenario">
-      <span class="scenario-caption">Scenario</span>
-      <div class="segmented">
-        <button type="button" class="seg-btn" id="btn-clean" aria-pressed="false">Clean</button>
-        <button type="button" class="seg-btn" id="btn-sim" aria-pressed="true">Simulated spoofing</button>
-      </div>
-    </div>
-  </header>
-
-  <div class="sim-banner" id="banner" role="status">
-    <span class="banner-tri" aria-hidden="true"></span>
-    Simulated data — not a live feed
-    <span class="banner-tri" aria-hidden="true"></span>
-  </div>
-
-  <main class="main">
-
-    <section class="map-col">
-      <div class="map-panel">
-        <svg viewBox="0 0 608 430" preserveAspectRatio="xMidYMid meet" class="map-svg" role="img" aria-label="Map of the eastern Baltic showing aircraft tracks and, in the simulated scenario, flagged flights and an estimated interference source">
-          <rect x="0" y="0" width="608" height="430" class="map-sea"></rect>
-
-          <!-- Coastline / land, illustrative shapes only -->
-          <g class="map-proj" fill="var(--land)" stroke="var(--border-strong)" stroke-width="1" vector-effect="non-scaling-stroke" stroke-linejoin="round">
-            <polygon points="4.5,63.9 18.5,63.9 17.5,61 17,60.6 18.3,59.4 17,58.8 16.7,57.3 16,56.2 14.3,55.4 12.9,56.2 12.5,57.7 11.2,58.9 10.8,59.2 9,59 6,60.5 7.5,62 8,63.9"></polygon>
-            <polygon points="21.5,63.9 29.5,63.9 31.5,62.5 31.5,61 28.5,60.5 26.5,60.4 25,60.2 23,59.8 21.5,60.6 21.2,61.5"></polygon>
-            <polygon points="24.3,59.6 26,59.5 28.2,59.4 27.8,58.3 27.4,57.6 25.6,57.8 24.3,57.9 23.5,58.4"></polygon>
-            <polygon points="24.3,57.9 25.6,57.8 27.4,57.6 28.2,56.2 26.6,55.7 25.1,56 24,56.3 21,56.1 21,57 23.5,58.4"></polygon>
-            <polygon points="21,56.1 24,56.3 25.1,56 26.6,55.7 26.3,55.2 24.9,54.2 23.5,53.9 22.8,54.4 21,55.3"></polygon>
-            <polygon points="19.6,54.4 22.8,54.4 22.7,55 20.8,55.3 19.6,54.7"></polygon>
-            <polygon points="14.2,54 16.5,54.6 18.9,54.8 19.6,54.4 22.8,54.4 23.5,53.9 23.9,52.5 23.2,52 14.5,52 14.1,52.9"></polygon>
-            <polygon points="23.5,53.9 24.9,54.2 26.3,55.2 28.5,55.5 30.8,55.5 31.5,54 30.5,52.3 27.5,51.8 23.9,52.5"></polygon>
-            <polygon points="28.2,56.2 30,56 31.5,56.5 33.5,58 33.5,63.9 31.5,62.5 31.5,61 28.5,60.5 28.2,59.4 27.8,58.3"></polygon>
-            <polygon points="8.2,57 10.6,57.6 10.7,56.5 9.9,55 8.5,55.2 8.1,56"></polygon>
-            <polygon points="11,56 12.6,56.1 12.7,55.3 11.2,55"></polygon>
-            <polygon points="6,53.7 8.5,55 9.9,55 11,54.4 12.5,54.5 14.2,54 14.1,52.9 14.5,52 13,51 10,51 7,51 6,52.5"></polygon>
-            <polygon points="7,51 10,51 13,51 14.5,52 14.1,50.5 12,49.2 8,49 6.5,49.6"></polygon>
-            <polygon points="14.5,52 23.2,52 23.9,52.5 23.5,49 16,49 14.1,50.5"></polygon>
-          </g>
-
-          <!-- Anomaly-density region cells, simulated scenario only -->
-          <g class="map-proj region-cells" id="region-cells" stroke="none">
-            <polygon points="19.5,56.5 21,56.5 21,57.5 19.5,57.5" fill="var(--caution)" fill-opacity="0.22"></polygon>
-            <polygon points="21,56.5 22.5,56.5 22.5,57.5 21,57.5" fill="var(--caution)" fill-opacity="0.16"></polygon>
-            <polygon points="19.5,57.5 21,57.5 21,58.5 19.5,58.5" fill="var(--caution)" fill-opacity="0.14"></polygon>
-            <polygon points="21,57.5 22.5,57.5 22.5,58.5 21,58.5" fill="var(--caution)" fill-opacity="0.11"></polygon>
-            <polygon points="18,56.5 19.5,56.5 19.5,57.5 18,57.5" fill="var(--caution)" fill-opacity="0.07"></polygon>
-            <polygon points="19.5,55.5 21,55.5 21,56.5 19.5,56.5" fill="var(--caution)" fill-opacity="0.07"></polygon>
-          </g>
-
-          <!-- Normal traffic tracks -->
-          <g class="map-proj" fill="none" vector-effect="non-scaling-stroke" stroke-linecap="round" stroke-linejoin="round">
-            <g id="normal-tracks" stroke-width="1.25" vector-effect="non-scaling-stroke">
-              <polyline points="12,55.5 14.5,56.5 17,57.5 19.5,58.4"></polyline>
-              <polyline points="10.5,59.5 13.5,58.5 16.5,57.4 19,56.2"></polyline>
-              <polyline points="14,52.5 17,53.5 20,54.3 23,54.8"></polyline>
-              <polyline points="26,62 24,60.8 22,59.6 20,58.3"></polyline>
-              <polyline points="8,54.5 11,55.2 14,55.8 17,56.2"></polyline>
-              <polyline points="28,58 26,57.2 24,56.3 22,55.3"></polyline>
-              <polyline points="9.5,51.5 13,52.6 16.5,53.6 20,54.4"></polyline>
-              <polyline points="23.5,61.5 25.5,60.5 27.5,59.6 29.5,58.8"></polyline>
-              <polyline points="11,60.5 13,59.2 15,58 17,56.8"></polyline>
-              <polyline points="30,53 27,53.6 24,53.9 21,53.6"></polyline>
-            </g>
-
-            <!-- Route: EFHK -> EDDF -->
-            <polyline points="24.97,60.32 20.5,58.6 16.5,56.3 13,53.8 8.57,50.03" class="route-line" stroke-width="2" stroke-dasharray="7 4"></polyline>
-
-            <!-- Flagged-flight track segments, simulated scenario only -->
-            <g id="flagged-tracks" stroke-dasharray="9 5" vector-effect="non-scaling-stroke">
-              <polyline points="25,60.2 23.2,59.2 21.6,58.3" data-owner="1"></polyline>
-              <polyline points="20.2,58.6 18.9,57.6" data-owner="1"></polyline>
-              <polyline points="18.1,59.3 19.6,58.2 21.2,57.2 22.6,56.3" data-owner="2"></polyline>
-              <polyline points="24.6,59.9 22.9,58 21.4,56.4 20.3,55.2" data-owner="3"></polyline>
-              <polyline points="24.1,56.9 22.3,56.6 20.4,56.4 18.6,56.2" data-owner="4"></polyline>
-              <polyline points="21,54.7 20,55.6 19.2,56.6 18.5,57.5" data-owner="5"></polyline>
-            </g>
-          </g>
-
-          <!-- Airport labels -->
-          <g class="airport-labels">
-            <g transform="translate(417.4,105.5)">
-              <rect x="-4" y="-4" width="8" height="8"></rect>
-              <text x="9" y="4">EFHK</text>
-            </g>
-            <g transform="translate(105.8,400.4)">
-              <rect x="-4" y="-4" width="8" height="8"></rect>
-              <text x="9" y="4">EDDF</text>
-            </g>
-          </g>
-
-          <!-- Anomaly-kind markers, simulated scenario only -->
-          <g id="anomaly-markers" fill="none" stroke="var(--caution)" stroke-width="1.8">
-            <path d="M342,153 L348,159.1 L342,165.2 L336,159.1 Z" class="marker-fill"></path>
-            <path d="M372.4,214.6 L378.4,220.7 L372.4,226.8 L366.4,220.7 Z" class="marker-fill"></path>
-            <path d="M345.8,188.4 L351.8,199.9 L339.8,199.9 Z" class="marker-fill"></path>
-            <path d="M315.4,159.8 L321.4,171.3 L309.4,171.3 Z" class="marker-fill"></path>
-            <rect x="372.1" y="167" width="10" height="10" class="marker-fill"></rect>
-            <rect x="378.8" y="132.6" width="10" height="10" class="marker-fill"></rect>
-            <circle cx="330.6" cy="217.9" r="6" class="marker-fill"></circle>
-            <circle cx="330.6" cy="217.9" r="2.4" fill="var(--caution)" stroke="none"></circle>
-            <path d="M302.8,207.1 L312.8,217.1 M312.8,207.1 L302.8,217.1"></path>
-            <path d="M297.1,178.5 L307.1,188.5 M307.1,178.5 L297.1,188.5"></path>
-          </g>
-
-          <!-- Estimated source crosshair -->
-          <g id="source-crosshair">
-            <ellipse cx="343.5" cy="202.4" rx="13.2" ry="10.8" fill="var(--computed)" fill-opacity="0.12" stroke="var(--computed)" stroke-width="1.6" stroke-dasharray="5 3"></ellipse>
-            <path d="M343.5,193.4 L343.5,211.4 M334.5,202.4 L352.5,202.4" stroke="var(--computed)" stroke-width="2"></path>
-            <circle cx="343.5" cy="202.4" r="3.4" fill="var(--computed)"></circle>
-            <path d="M348,193 L470,96" stroke="var(--computed)" stroke-width="1" stroke-dasharray="3 2.5"></path>
-          </g>
-
-          <!-- Simulated true source (toggleable) -->
-          <g id="true-source">
-            <circle cx="337.1" cy="197.2" r="7" fill="none" stroke="var(--text-2)" stroke-width="1.6" stroke-dasharray="3 2.5"></circle>
-            <path d="M330.5,194 L214,158" stroke="var(--text-muted)" stroke-width="1" stroke-dasharray="3 2.5"></path>
-            <text x="80" y="155" class="mono-label">SIMULATED TRUE SOURCE</text>
-          </g>
-
-          <!-- Per-flight anomaly triangle markers -->
-          <g id="flight-markers" fill="var(--caution)">
-            <path d="M302.1,177.5 L306.6,186.5 L297.6,186.5 Z" stroke="var(--bg)" stroke-width="1" data-owner="1"></path>
-            <path d="M372.4,214.7 L376.9,223.7 L367.9,223.7 Z" stroke="var(--bg)" stroke-width="1" data-owner="2"></path>
-            <path d="M328.7,246.3 L333.2,255.3 L324.2,255.3 Z" stroke="var(--bg)" stroke-width="1" data-owner="3"></path>
-            <path d="M296.4,217.6 L300.9,226.6 L291.9,226.6 Z" stroke="var(--bg)" stroke-width="1" data-owner="4"></path>
-            <path d="M294.5,180.3 L299,189.3 L290,189.3 Z" stroke="var(--bg)" stroke-width="1" data-owner="5"></path>
-          </g>
-
-          <!-- Selected-flight ring + callsign chip -->
-          <g id="sel-ring" hidden>
-            <circle id="sel-ring-outer" r="15" fill="none" stroke="#FFFFFF" stroke-width="1.8"></circle>
-            <circle id="sel-ring-halo" r="21" fill="none" stroke="#FFFFFF" stroke-width="1" stroke-opacity="0.35"></circle>
-            <g class="sel-chip">
-              <rect id="sel-chip-rect" width="88" height="21" fill="var(--bg)" stroke="#FFFFFF" stroke-width="1.4" rx="2"></rect>
-              <text id="sel-chip-text" class="mono-chip" fill="#FFFFFF"></text>
-            </g>
-          </g>
+    <!-- controls float over the map; there is no header bar -->
+    <div class="hud">
+      <div class="hud-row">
+        <svg class="brand-mark" viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="12" cy="12" r="3" class="bm-core"></circle>
+          <circle cx="12" cy="12" r="7.5" class="bm-ring"></circle>
+          <circle cx="12" cy="12" r="11" class="bm-ring bm-ring--faint"></circle>
         </svg>
-
-        <div class="map-legend">
-          <div class="legend-title">Tracks</div>
-          <div class="legend-row"><svg width="30" height="4" aria-hidden="true"><line x1="0" y1="2" x2="30" y2="2" stroke="var(--track-normal)" stroke-width="1.5"></line></svg>Normal</div>
-          <div class="legend-row"><svg width="30" height="5" aria-hidden="true"><line x1="0" y1="2.5" x2="30" y2="2.5" stroke="var(--caution)" stroke-width="3.5" stroke-dasharray="7 4"></line></svg>Flagged</div>
-          <div class="legend-row"><svg width="30" height="4" aria-hidden="true"><line x1="0" y1="2" x2="30" y2="2" stroke="var(--text-2)" stroke-width="2" stroke-dasharray="6 3"></line></svg>Route</div>
-        </div>
-
-        <div class="map-overlay map-overlay--source" id="src-overlay">
-          <div class="overlay-top">
-            <span class="overlay-label">Estimated source</span>
-            <span class="overlay-meta">±42 km · conf 0.71</span>
-          </div>
-          <div class="overlay-coords">56.94°N&nbsp;&nbsp;21.08°E</div>
-        </div>
-
-        <div class="map-overlay map-overlay--clean" id="clean-overlay">
-          <svg width="18" height="18" aria-hidden="true"><circle cx="9" cy="9" r="7.5" fill="none" stroke="var(--text-muted)" stroke-width="1.8"></circle><path d="M5.5,9.2 L8,11.5 L12.5,6.5" fill="none" stroke="var(--text-muted)" stroke-width="1.8"></path></svg>
-          <span>No interference signs detected</span>
-        </div>
-
-        <button type="button" class="true-source-btn" id="true-btn" aria-pressed="true">
-          <span id="true-btn-box" aria-hidden="true">☑</span> Simulated true source
-        </button>
-      </div>
-
-      <div class="anomaly-legend">
-        <div class="legend-title legend-title--stacked">Anomalies<br>by kind</div>
-        <div class="anomaly-kind"><svg width="16" height="16" aria-hidden="true"><path d="M8,2 L14,8 L8,14 L2,8 Z" fill="var(--bg)" stroke="var(--caution)" stroke-width="1.6"></path></svg>Position jump<span class="count-badge" id="c-jump">7</span></div>
-        <div class="anomaly-kind"><svg width="16" height="16" aria-hidden="true"><path d="M8,2.5 L14,13 L2,13 Z" fill="var(--bg)" stroke="var(--caution)" stroke-width="1.6"></path></svg>Baro/GNSS alt mismatch<span class="count-badge" id="c-alt">5</span></div>
-        <div class="anomaly-kind"><svg width="16" height="16" aria-hidden="true"><rect x="3" y="3" width="10" height="10" fill="var(--bg)" stroke="var(--caution)" stroke-width="1.6"></rect></svg>Velocity mismatch<span class="count-badge" id="c-vel">4</span></div>
-        <div class="anomaly-kind"><svg width="16" height="16" aria-hidden="true"><circle cx="8" cy="8" r="6" fill="var(--bg)" stroke="var(--caution)" stroke-width="1.6"></circle><circle cx="8" cy="8" r="2.4" fill="var(--caution)"></circle></svg>Duplicate ID<span class="count-badge" id="c-dup">2</span></div>
-        <div class="anomaly-kind"><svg width="16" height="16" aria-hidden="true"><path d="M3,3 L13,13 M13,3 L3,13" stroke="var(--caution)" stroke-width="1.8"></path></svg>Signal dropout<span class="count-badge" id="c-drop">3</span></div>
-      </div>
-
-      <div class="time-panel">
-        <div class="time-head">
-          <span class="legend-title">Time window</span>
-          <span class="time-value mono" id="time-label">14:05 UTC</span>
-        </div>
-        <input type="range" min="0" max="25" step="1" value="25" class="time-slider" id="time-range" aria-label="Time within the demo window, 13:40 to 14:05 UTC">
-        <div class="time-ticks"><span>13:40</span><span>14:05</span></div>
-      </div>
-    </section>
-
-    <aside class="side-col">
-
-      <div class="panel flights-panel">
-        <div class="panel-head">
-          <span class="legend-title">Flagged flights</span>
-          <span class="count-badge" id="flagged-count-2">5</span>
-        </div>
-
-        <p class="empty-note" id="clean-note" hidden>No flights flagged in this window.</p>
-
-        <div class="flights-table" id="flights-table">
-          <div class="flights-head">
-            <div>Callsign</div><div>ICAO24</div><div>Score</div><div>Top anomaly</div>
-          </div>
-          <div class="flights-list" id="flights-list"></div>
+        <span class="brand-name">GNSS&nbsp;Watch</span>
+        <div class="scenario" role="group" aria-label="Scenario">
+          <button type="button" class="seg" id="btn-clean" aria-pressed="false">Clean</button>
+          <button type="button" class="seg" id="btn-spoof" aria-pressed="true">Interference</button>
         </div>
       </div>
 
-      <div class="panel risk-panel">
-        <div class="risk-top">
-          <div class="risk-score mono" id="risk-score">0.68</div>
-          <div class="risk-body">
-            <div class="risk-head">
-              <span class="legend-title">Route risk · EFHK → EDDF</span>
-              <span class="illustrative-badge">illustrative, not measured</span>
-            </div>
-            <div class="risk-bar-row">
-              <div class="risk-bar-track"><div class="risk-bar-fill" id="risk-bar"></div></div>
-              <span class="risk-label" id="risk-label">elevated</span>
-            </div>
-          </div>
+      <div class="hud-stats">
+        <div class="ro">
+          <span class="ro-value mono" id="ro-tracked">—</span>
+          <span class="ro-label">tracked</span>
         </div>
-        <ol class="advice-list">
-          <li><span class="advice-num">1</span>Expect GNSS degradation on this corridor.</li>
-          <li><span class="advice-num">2</span>Brief crew.</li>
-          <li><span class="advice-num">3</span>Confirm a non-GNSS approach is available at destination and alternate.</li>
-        </ol>
+        <div class="ro ro--flag">
+          <span class="ro-value mono" id="ro-flagged">—</span>
+          <span class="ro-label">flagged</span>
+        </div>
+        <div class="ro">
+          <span class="ro-value mono" id="ro-eps">—</span>
+          <span class="ro-label">findings</span>
+        </div>
+        <div class="ro ro--time">
+          <span class="ro-value mono" id="clock">—</span>
+        </div>
       </div>
 
-      <div class="panel brief-panel">
-        <div class="panel-head">
-          <span class="legend-title">Brief</span>
-          <button type="button" class="copy-btn" id="copy-btn">Copy</button>
-        </div>
-        <p class="brief-text" id="brief-text"></p>
-      </div>
+      <div class="chip" id="sim-chip">SIMULATED EVENTS · detector output is real</div>
+    </div>
 
+    <!-- the zone the replay is currently inside, if any -->
+    <aside class="glass zone" id="zone-card" hidden>
+      <div class="glass-head">
+        <span class="dot dot--computed" aria-hidden="true"></span>
+        <span id="zone-title">Located source</span>
+        <span class="zone-live mono" id="zone-live">ACTIVE</span>
+      </div>
+      <div class="zone-coords mono" id="zone-coords">—</div>
+      <div class="zone-meta mono" id="zone-meta">—</div>
+      <div class="zone-err mono" id="zone-err"></div>
     </aside>
+
+    <aside class="glass clear" id="clear-card" hidden>
+      <svg viewBox="0 0 20 20" class="clear-tick" aria-hidden="true">
+        <circle cx="10" cy="10" r="8.4"></circle><path d="M6,10.3 L8.8,13 L14,7.4"></path>
+      </svg>
+      <div>
+        <div class="clear-title">No interference signs</div>
+        <div class="clear-sub mono" id="clear-sub">—</div>
+      </div>
+    </aside>
+
+    <aside class="glass legend">
+      <div class="lg-row"><span class="swatch sw-normal"></span>Nominal traffic</div>
+      <div class="lg-row"><span class="swatch sw-flag"></span>Flagged by detector</div>
+      <div class="lg-row"><span class="swatch sw-computed"></span>Located source</div>
+      <div class="lg-row lg-row--muted"><span class="swatch sw-truth"></span>Simulated truth</div>
+    </aside>
+
   </main>
 
-  <footer class="footer">
-    Situational awareness from public ADS-B data, not an operational tool. All figures on this screen are placeholder sample data.
-  </footer>
+  <!-- ── right rail ──────────────────────────────────────────────────── -->
+  <aside class="rail">
+
+    <section class="rail-sec rail-sec--grow">
+      <h2 class="rail-h">Findings <span class="rail-count mono" id="feed-count">0</span></h2>
+      <div class="feed" id="feed" role="list"></div>
+      <p class="empty" id="feed-empty">Nothing detected yet in this replay.</p>
+    </section>
+
+    <section class="rail-sec ladder-sec">
+      <h2 class="rail-h">Altitude <span class="rail-count mono" id="ladder-count">0</span></h2>
+      <div class="ladder" id="ladder"></div>
+      <p class="ladder-note mono" id="ladder-note"></p>
+    </section>
+
+  </aside>
+
+  <div class="foot-note">
+    Situational awareness from public-style ADS-B data, not a certified operational tool.
+    Detector output is real; the interference events it runs against are SIMULATED.
+    <span class="gen mono" id="gen"></span>
+  </div>
+
 </div>
 
 <script src="app.js"></script>
